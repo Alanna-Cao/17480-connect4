@@ -1,12 +1,14 @@
 from uuid import uuid4
 from pydantic import BaseModel
 from typing import List, Optional
+import random
 
 # Define the Player model
 class Player(BaseModel):
     id: str
     name: str
     color: str
+    type: str
 
 # Define the Game model
 class Game(BaseModel):
@@ -16,22 +18,24 @@ class Game(BaseModel):
     current_turn: str
     status: str
     winner: Optional[str] = None
+    num_players: int # 0, 1, or 2 of the players are human
 
     class Config:
         orm_mode = True
 
 # Game logic class
 class GameLogic:
-    def __init__(self, player1_name: str, player2_name: str):
+    def __init__(self, player1_name: str, player2_name: str, player1_type: str = "human", player2_type: str = "human", num_human_players: int = 2):
         self.game = Game(
             id=str(uuid4()),
             board=[[None for _ in range(7)] for _ in range(6)],
             players={
-                "p1": Player(id="p1", name=player1_name, color="red"),
-                "p2": Player(id="p2", name=player2_name, color="yellow"),
+                "p1": Player(id="p1", name=player1_name, color="red", type=player1_type),
+                "p2": Player(id="p2", name=player2_name, color="yellow", type=player2_type),
             },
             current_turn="p1",
-            status="in-progress"
+            status="in-progress",
+            num_players=num_human_players
         )
     
     def make_move(self, player_id: str, column: int):
@@ -83,3 +87,20 @@ class GameLogic:
 
     def to_dict(self):
         return self.game.dict()  # Use Pydantic's dict method to get a dict representation
+
+    def get_next_move(self):
+        if self.game.winner:
+            return {"error": "Game already won."}
+
+        if all(cell is not None for row in self.game.board for cell in row):
+            return {"error": "Board is full."}
+
+        # Collect all empty columns
+        empty_columns = [col for col in range(7) if self.game.board[0][col] is None]
+
+        if not empty_columns:
+            return {"error": "No valid moves available"}
+
+        # Choose a random empty column
+        next_move = random.choice(empty_columns)
+        return next_move

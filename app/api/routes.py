@@ -11,8 +11,10 @@ def list_games():
     return [game.to_dict() for game in games.values()]
 
 @router.post("/games", response_model=Game)
-def create_game(player1_name: str, player2_name: str):
-    game_logic = GameLogic(player1_name, player2_name)
+def create_game(player1_name: str, player2_name: str, num_human_players: int):
+    player1_type = "human" if num_human_players > 0 else "computer"
+    player2_type = "human" if num_human_players > 1 else "computer"
+    game_logic = GameLogic(player1_name, player2_name, player1_type, player2_type, num_human_players)
     games[game_logic.game.id] = game_logic  # Store the GameLogic instance
     return game_logic.to_dict()
 
@@ -59,3 +61,15 @@ def quit_game(game_id: str):
         raise HTTPException(status_code=404, detail="Game not found")
 
     return {"message": "Game has been quit.", "game_id": game_id}
+
+@router.post("/games/{game_id}/next_move")
+def get_next_move(game_id: str):
+    game_logic = games.get(game_id)
+    if not game_logic:
+        raise HTTPException(status_code=404, detail="Game not found")
+
+    next_move = game_logic.get_next_move()
+    if next_move is None:
+        raise HTTPException(status_code=400, detail="No valid moves available")
+    
+    return {"message": "Next move calculated.", "next_move": next_move}
