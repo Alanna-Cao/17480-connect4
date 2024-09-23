@@ -70,7 +70,7 @@ def print_board(board, players):
 def display_help():
     print("----------------------------------------------")
     print("Available commands:")
-    print("  0-6: Drop a piece in the specified column")
+    print("  0-5: Drop a piece in the specified column")
     print("  r  : Restart the game")
     print("  q  : Quit the game")
     print("  h  : Display this help message")
@@ -155,7 +155,7 @@ def main():
                     game = make_move(game_id, game["current_turn"], next_move["next_move"])
                     print_current_board(game)
             else:
-                command = input("Enter column (0-6) or command ('h' for help): ").strip().lower()
+                command = input("Enter column (0-5) or command ('h' for help): ").strip().lower()
 
                 if command in commands:
                     result = commands[command]()
@@ -190,7 +190,7 @@ def main():
                         game = make_move(game_id, game["current_turn"], column)
                         print_current_board(game)
                     except ValueError:
-                        print("Invalid input. Please enter a column number (0-6), 'r' to restart, or 'q' to quit.")
+                        print("Invalid input. Please enter a column number (0-5), 'r' to restart, or 'q' to quit.")
 
 if __name__ == "__main__":
     main()
