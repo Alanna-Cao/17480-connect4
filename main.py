@@ -1,18 +1,40 @@
 from fastapi import FastAPI
 from app.api.routes import router
 
+# API Tags metadata
+tags_metadata = [
+    {
+        "name": "Game Management",
+        "description": "Operations for managing Connect 4 games: create, view, restart, quit."
+    },
+    {
+        "name": "Gameplay",
+        "description": "Operations for making moves and calculating the next move."
+    },
+]
+
+description = """
+The Connect 4 API allows users to create and play the classic Connect 4 game.
+
+- **Game creation** for two human players, a human vs. a computer, or two computers.
+- **Gameplay** for making moves, checking the game state, and calculating the computer's next move.
+- **Game state management** including restarting and quitting a game.
+"""
+
+# FastAPI application setup with metadata
 app = FastAPI(
     title="Connect 4 API",
-    description="API for the Connect 4 game...add documentation here",
-    version="0.1",
+    description=description,
+    version="1.0.0",
+    openapi_tags=tags_metadata,
     docs_url="/docs",
-    redoc_url=None,
+    redoc_url="/redoc",
     openapi_url="/openapi.json"
 )
 
-@app.get("/")
-def read_root():
-    return {"message": "Welcome to the Connect 4 API! For more information, visit /docs."}
+# @app.get("/")
+# def read_root():
+#     return {"message": "Welcome to the Connect 4 API! For more information, visit /docs."}
 
 app.include_router(router)
 
