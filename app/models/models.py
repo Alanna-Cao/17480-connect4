@@ -49,7 +49,7 @@ class GameLogic:
 
         for row in reversed(range(6)):
             if self.game.board[row][column] is None:
-                self.game.board[row][column] = self.game.players[player_id].color
+                self.game.board[row][column] = player_id
                 if self.check_winner(row, column):
                     self.game.winner = player_id
                     self.game.status = "won"
@@ -62,18 +62,18 @@ class GameLogic:
         return {"error": "Invalid move."}
 
     def check_winner(self, row: int, column: int):
-        color = self.game.board[row][column]
-        return (self.check_direction(row, column, 1, 0, color) or
-                self.check_direction(row, column, 0, 1, color) or
-                self.check_direction(row, column, 1, 1, color) or
-                self.check_direction(row, column, 1, -1, color))
+        player_id = self.game.board[row][column]
+        return (self.check_direction(row, column, 1, 0, player_id) or
+                self.check_direction(row, column, 0, 1, player_id) or
+                self.check_direction(row, column, 1, 1, player_id) or
+                self.check_direction(row, column, 1, -1, player_id))
 
-    def check_direction(self, row: int, column: int, row_dir: int, col_dir: int, color: str):
+    def check_direction(self, row: int, column: int, row_dir: int, col_dir: int, player_id: str):
         count = 0
         for delta in range(-3, 4):
             r = row + delta * row_dir
             c = column + delta * col_dir
-            if 0 <= r < 6 and 0 <= c < 7 and self.game.board[r][c] == color:
+            if 0 <= r < 6 and 0 <= c < 7 and self.game.board[r][c] == player_id:
                 count += 1
                 if count == 4:
                     return True
