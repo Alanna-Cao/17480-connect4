@@ -32,9 +32,9 @@ app = FastAPI(
     openapi_url="/openapi.json"
 )
 
-# @app.get("/")
-# def read_root():
-#     return {"message": "Welcome to the Connect 4 API! For more information, visit /docs."}
+@app.get("/")
+def read_root():
+    return {"message": "Welcome to the Connect 4 API! For more information, visit /docs."}
 
 app.include_router(router)
 
