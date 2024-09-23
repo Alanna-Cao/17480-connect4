@@ -8,12 +8,10 @@ games = {}
 
 @router.get("/games", response_model=List[Game])
 def list_games():
-    """List all active games."""
     return [game.to_dict() for game in games.values()]
 
 @router.post("/games", response_model=Game)
 def create_game(player1_name: str, player2_name: str):
-    """Create a new game."""
     game_logic = GameLogic(player1_name, player2_name)
     games[game_logic.game.id] = game_logic  # Store the GameLogic instance
     return game_logic.to_dict()
@@ -55,8 +53,8 @@ def restart_game(game_id: str):
 
 @router.post("/games/{game_id}/quit")
 def quit_game(game_id: str):
-    """Quit the game, marking it as finished."""
-    game_logic = games.pop(game_id, None)  # Remove the game from the active list
+    """Quit the game"""
+    game_logic = games.get(game_id)
     if not game_logic:
         raise HTTPException(status_code=404, detail="Game not found")
 
