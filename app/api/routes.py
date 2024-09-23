@@ -34,7 +34,7 @@ games = {}
     })
 def list_games() -> List[Game]:
     """
-    Get a list of all games.
+    Get a list of all games, including key details such as game ID, player names, board state, and game status (e.g., in-progress, won, draw).
     """
     return [game.to_dict() for game in games.values()]
 
@@ -42,14 +42,36 @@ def list_games() -> List[Game]:
     "/games",
     response_model=Game,
     responses={
-        400: {"model": ErrorResponse, "description": "Invalid number of human players or missing player names"}
+        200: {
+            "description": "Game created successfully.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "id": "game_id_1",
+                        "players": {
+                            "p1": {"name": "Alice", "type": "human"},
+                            "p2": {"name": "Computer", "type": "computer"}
+                        },
+                        "board": [[None, None, None, None, None, None, None] for _ in range(6)],
+                        "status": "in-progress",
+                        "current_turn": "p1"
+                    }
+                }
+            }
+        },
+        400: {
+            "description": "Invalid number of human players or missing player names",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "detail": "Player 1 name is required for one human player."
+                    }
+                }
+            }
+        }
     },
     tags=["Game Management"],
-    summary="Create a new game",
-    description=(
-        "Creates a new game with zero, one, or two human players. If a player name is not provided, the game will automatically initialize a computer player. "
-        "If no player names are specified, the game will be created with two computer players."
-    )
+    summary="Create a new game"
 )
 def create_game(
     player1_name: str = Query(None, description="Name of player 1 (required for human players)"),
@@ -57,10 +79,12 @@ def create_game(
     num_human_players: NumHumanPlayers = Query(..., description="Number of human players (0, 1, or 2)")
 ) -> Game:
     """
-    Creates a new game with zero, one, or two human players.
+    Creates a new game with a specified number of human players. 
+    - If `num_human_players` is 0, both players will be computer players.
+    - If `num_human_players` is 1, player 1 must provide a name, and player 2 will be a computer player.
+    - If `num_human_players` is 2, both player names are required.
 
-    If a player name is not provided, the game will automatically initialize a computer player. If no player names are specified, the game will be created with two computer players.
-    """
+    If the player names are not provided according to the specified number of human players, appropriate HTTP exceptions will be raised.    """
     if num_human_players not in NumHumanPlayers:
         raise HTTPException(status_code=400, detail="Invalid number of human players. Must be 0, 1, or 2.")
     
@@ -82,14 +106,34 @@ def create_game(
     "/games/{game_id}",
     response_model=Game,
     responses={
-        404: {"model": ErrorResponse, "description": "Game not found"}
+        200: {
+            "description": "Game retrieved successfully.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "id": "game_id_1",
+                        "players": {
+                            "p1": {"name": "Alice", "type": "human"},
+                            "p2": {"name": "Computer", "type": "computer"}
+                        },
+                        "board": [[None, None, None, None, None, None, None] for _ in range(6)],
+                        "status": "in-progress",
+                        "current_turn": "p1"
+                    }
+                }
+            }
+        },
+        404: {
+            "description": "Game not found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Game not found"}
+                }
+            }
+        }
     },
     tags=["Game Management"],
-    summary="Get a specific game",
-    description=(
-        "Retrieve the current state of a specific game by its unique game ID."
-        "The response includes the game ID, players, board state, and current status."
-    )
+    summary="Get a specific game"
 )
 def get_game(game_id: str) -> Game:
     """
@@ -104,15 +148,38 @@ def get_game(game_id: str) -> Game:
     "/games/{game_id}/restart",
     response_model=Game,
     responses={
-        404: {"model": ErrorResponse, "description": "Game not found"}
+        200: {
+            "description": "Game restarted successfully.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "id": "game_id_1",
+                        "players": {
+                            "p1": {"name": "Alice", "type": "human"},
+                            "p2": {"name": "Computer", "type": "computer"}
+                        },
+                        "board": [[None, None, None, None, None, None, None] for _ in range(6)],
+                        "status": "in-progress",
+                        "current_turn": "p1"
+                    }
+                }
+            }
+        },
+        404: {
+            "description": "Game not found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Game not found"}
+                }
+            }
+        }
     },
     tags=["Game Management"],
-    summary="Restart a game",
-    description="Reset the game board while keeping existing player information."
+    summary="Restart a game"
 )
 def restart_game(game_id: str) -> Game:
     """
-    Restart the game; resetting the board while keeping existing player information.
+    Restarts the specified game by resetting the game board and status, while preserving the original player details (names and types). This is useful if players want to start a new round without creating a new game from scratch.
     """
     game_logic = games.get(game_id)
     if not game_logic:
@@ -128,15 +195,32 @@ def restart_game(game_id: str) -> Game:
 @router.post(
     "/games/{game_id}/quit",
     responses={
-        404: {"model": ErrorResponse, "description": "Game not found"}
+        200: {
+            "description": "Game has been quit successfully.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "message": "Game has been quit.",
+                        "game_id": "game_id_1"
+                    }
+                }
+            }
+        },
+        404: {
+            "description": "Game not found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Game not found"}
+                }
+            }
+        }
     },
     tags=["Game Management"],
-    summary="Quit a game",
-    description="Remove the specified game from the list of active games."
+    summary="Quit a game"
 )
 def quit_game(game_id: str) -> dict:
     """
-    Quit the game. The game will be removed from the list of games.
+    Remove the game from the in-memory storage. This effectively "quits" the game and deletes all associated data, freeing up resources. Quitting a game is irreversible, and the game cannot be recovered after quitting.
     """
     game_logic = games.get(game_id)
     if not game_logic:
@@ -150,12 +234,49 @@ def quit_game(game_id: str) -> dict:
     "/games/{game_id}/moves",
     response_model=Game,
     responses={
-        404: {"model": ErrorResponse, "description": "Game not found"},
-        400: {"model": ErrorResponse, "description": "Invalid move"}
+        200: {
+            "description": "Move made successfully.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "id": "game_id_1",
+                        "players": {
+                            "p1": {"name": "Alice", "type": "human"},
+                            "p2": {"name": "Computer", "type": "computer"}
+                        },
+                        "board": [
+                            [None, None, None, None, None, None, None],
+                            [None, None, None, None, None, None, None], 
+                            [None, None, None, None, None, None, None], 
+                            [None, None, None, None, None, None, None], 
+                            [None, None, None, None, None, None, None],  
+                            [None, None, None, "p1", None, None, None] 
+                        ],
+                        "status": "in-progress",
+                        "current_turn": "p2"
+                    }
+                }
+            }
+        },
+        400: {
+            "description": "Invalid move",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Invalid move. The column is full."}
+                }
+            }
+        },
+        404: {
+            "description": "Game not found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Game not found"}
+                }
+            }
+        }
     },
     tags=["Gameplay"],
-    summary="Make a move in the game",
-    description="Drop a piece in the specified column for the given game."
+    summary="Make a move in the game"
 )
 def make_move(
     game_id: str,
@@ -163,7 +284,7 @@ def make_move(
     column: int = Query(..., description="Column to drop the piece in")
 ) -> Game:
     """
-    Make a move by dropping a piece in a column.
+    Make a move by specifying the column in which to drop their piece. This checks that the move is valid by ensuring it's the correct player's turn, the column is within bounds, and the column is not full. If any condition fails, an appropriate error response is returned.
     """
     game_logic = games.get(game_id)
     if not game_logic:
@@ -178,12 +299,36 @@ def make_move(
 @router.post(
     "/games/{game_id}/next_move",
     responses={
-        404: {"model": ErrorResponse, "description": "Game not found"},
-        400: {"model": ErrorResponse, "description": "No valid moves available"}
+        200: {
+            "description": "Next move calculated successfully.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "message": "Next move calculated.",
+                        "next_move": 4
+                    }
+                }
+            }
+        },
+        400: {
+            "description": "No valid moves available",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No valid moves available"}
+                }
+            }
+        },
+        404: {
+            "description": "Game not found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Game not found"}
+                }
+            }
+        }
     },
     tags=["Gameplay"],
-    summary="Get the next move for the computer player",
-    description="Calculate the next move for the computer player in the specified game."
+    summary="Get the next move for the computer player"
 )
 def get_next_move(game_id: str) -> dict:
     """
