@@ -2,6 +2,10 @@ from uuid import uuid4
 from pydantic import BaseModel
 from typing import List, Optional
 import random
+from enum import Enum
+
+class ErrorResponse(BaseModel):
+    detail: str
 
 # Define the Player model
 class Player(BaseModel):
@@ -9,6 +13,11 @@ class Player(BaseModel):
     name: str
     color: str
     type: str
+
+class NumHumanPlayers(int, Enum):
+    zero = 0
+    one = 1
+    two = 2
 
 # Define the Game model
 class Game(BaseModel):
@@ -18,14 +27,14 @@ class Game(BaseModel):
     current_turn: str
     status: str
     winner: Optional[str] = None
-    num_players: int # 0, 1, or 2 of the players are human
+    num_players: NumHumanPlayers # 0, 1, or 2 of the players are human
 
     class Config:
         orm_mode = True
 
 # Game logic class
 class GameLogic:
-    def __init__(self, player1_name: str, player2_name: str, player1_type: str = "human", player2_type: str = "human", num_human_players: int = 2):
+    def __init__(self, player1_name: str, player2_name: str, player1_type: str = "human", player2_type: str = "human", num_human_players: NumHumanPlayers = NumHumanPlayers.two):
         self.game = Game(
             id=str(uuid4()),
             board=[[None for _ in range(7)] for _ in range(6)],
