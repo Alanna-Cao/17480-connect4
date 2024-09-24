@@ -14,7 +14,7 @@ games = {}
     summary="List all games",
     responses={
         200: {
-            "description": "A list of all games, including game ID, players, board state, and status for each game.",
+            "description": "A list of all games, including game ID, players, board state, current turn, and status for each game.",
             "content": {
                 "application/json": {
                     "example": [
@@ -25,7 +25,8 @@ games = {}
                                 "p2": {"name": "Bob", "type": "human"}
                             },
                             "board": [[None, None, None, None, None, None, None] for _ in range(6)],
-                            "status": "in-progress"
+                            "status": "in-progress",
+                            "current_turn": "p1"
                         }
                     ]
                 }
@@ -262,7 +263,7 @@ def quit_game(game_id: str) -> dict:
             "description": "Invalid move",
             "content": {
                 "application/json": {
-                    "example": {"detail": "Invalid move. The column is full."}
+                    "example": {"detail": "It's not your."}
                 }
             }
         },

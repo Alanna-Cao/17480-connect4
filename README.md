@@ -19,6 +19,4 @@ This is a FastAPI implementation of the Connect 4 game API.
     By default, the server will run on http://127.0.0.1:8000.
     API Documentation can be found at: http://127.0.0.1:8000/docs.
 
-## Milestone 1
-
 
