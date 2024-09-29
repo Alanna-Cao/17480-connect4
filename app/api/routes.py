@@ -263,7 +263,7 @@ def quit_game(game_id: str) -> dict:
             "description": "Invalid move",
             "content": {
                 "application/json": {
-                    "example": {"detail": "It's not your."}
+                    "example": {"detail": "Invalid move."}
                 }
             }
         },
