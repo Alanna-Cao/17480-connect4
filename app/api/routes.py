@@ -114,12 +114,24 @@ def create_game(
                     "example": {
                         "id": "game_id_1",
                         "players": {
-                            "p1": {"name": "Alice", "type": "human"},
-                            "p2": {"name": "Computer", "type": "computer"}
+                            "p1": {
+                                "id": "p1",
+                                "name": "Alice",
+                                "color": "red",
+                                "type": "human"
+                            },
+                            "p2": {
+                                "id": "p2",
+                                "name": "Computer",
+                                "color": "yellow",
+                                "type": "computer"
+                            }
                         },
                         "board": [[None, None, None, None, None, None, None] for _ in range(6)],
                         "status": "in-progress",
-                        "current_turn": "p1"
+                        "current_turn": "p1",
+                        "winner": None,
+                        "num_players": 2
                     }
                 }
             }
@@ -134,11 +146,11 @@ def create_game(
         }
     },
     tags=["Game Management"],
-    summary="Get a specific game"
+    summary="Get the current state of a specific game."
 )
 def get_game(game_id: str) -> Game:
     """
-    Get the current state of a specific game.
+    Get the current state of a specific game identified by the `game_id`. The `winner` field indicates the player who has won the game. If the game ends in a tie, the `winner` field will be `None` and the `status` field will be set to `"draw"`.
     """
     game_logic = games.get(game_id)
     if not game_logic:

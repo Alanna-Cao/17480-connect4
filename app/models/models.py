@@ -19,13 +19,18 @@ class NumHumanPlayers(int, Enum):
     one = 1
     two = 2
 
+class GameStatus(str, Enum):
+    IN_PROGRESS = "in-progress"
+    WON = "won"
+    DRAW = "draw"
+
 # Define the Game model
 class Game(BaseModel):
     id: str
     board: List[List[Optional[str]]]
     players: dict
     current_turn: str
-    status: str
+    status: GameStatus
     winner: Optional[str] = None
     num_players: NumHumanPlayers # 0, 1, or 2 of the players are human
 
@@ -43,7 +48,7 @@ class GameLogic:
                 "p2": Player(id="p2", name=player2_name, color="yellow", type=player2_type),
             },
             current_turn="p1",
-            status="in-progress",
+            status=GameStatus.IN_PROGRESS,
             num_players=num_human_players
         )
     
@@ -65,9 +70,9 @@ class GameLogic:
                 self.game.board[row][column] = player_id
                 if self.check_winner(row, column):
                     self.game.winner = player_id
-                    self.game.status = "won"
+                    self.game.status = GameStatus.WON
                 elif all(cell is not None for row in self.game.board for cell in row):
-                    self.game.status = "draw"
+                    self.game.status = GameStatus.DRAW
                 else:
                     self.game.current_turn = "p2" if self.game.current_turn == "p1" else "p1"
                 return self.game
