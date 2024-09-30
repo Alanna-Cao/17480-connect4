@@ -113,8 +113,8 @@ class GameLogic:
         empty_columns = [col for col in range(7) if self.game.board[0][col] is None]
 
         if not empty_columns:
-            return {"error": "No valid moves available"}
+            return {"error": "No empty columns."}
 
         # Choose a random empty column
         next_move = random.choice(empty_columns)
-        return next_move
+        return {"message": "Next move calculated.", "next_move": next_move}

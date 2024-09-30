@@ -150,7 +150,9 @@ def create_game(
 )
 def get_game(game_id: str) -> Game:
     """
-    Get the current state of a specific game identified by the `game_id`. The `winner` field indicates the player who has won the game. If the game ends in a tie, the `winner` field will be `None` and the `status` field will be set to `"draw"`.
+    Get the current state of a specific game identified by the `game_id`. 
+    The status field indicates whether the game is in progress, won, or drawn.
+    The `winner` field indicates the id of the player who has won the game. For games in progress or drawn, this field is `None` (will not appear in output dicts).
     """
     game_logic = games.get(game_id)
     if not game_logic:
@@ -173,7 +175,8 @@ def get_game(game_id: str) -> Game:
                         },
                         "board": [[None, None, None, None, None, None, None] for _ in range(6)],
                         "status": "in-progress",
-                        "current_turn": "p1"
+                        "current_turn": "p1",
+                        "winner": None
                     }
                 }
             }
@@ -266,7 +269,8 @@ def quit_game(game_id: str) -> dict:
                             [None, None, None, "p1", None, None, None] 
                         ],
                         "status": "in-progress",
-                        "current_turn": "p2"
+                        "current_turn": "p2",
+                        "winner": None
                     }
                 }
             }
@@ -298,6 +302,13 @@ def make_move(
 ) -> Game:
     """
     Make a move by specifying the column in which to drop their piece. This checks that the move is valid by ensuring it's the correct player's turn, the column is within bounds, and the column is not full. If any condition fails, an appropriate error response is returned.
+    Potential error responses include:
+    - "Game already won": The game has already been won, and no more moves can be made.
+    - "It's not your turn": The move was made by a player who is not currently allowed to make a move.
+    - "Column out of bounds": The specified column is not within the valid range.
+    - "Column is full": The specified column is already full, and no more pieces can be dropped in it.
+    - "Invalid move": A generic catch-all error indicating that the move was not successful.
+    - "Game not found": The specified game ID does not correspond to an active game.
     """
     game_logic = games.get(game_id)
     if not game_logic:

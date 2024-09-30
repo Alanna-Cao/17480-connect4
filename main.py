@@ -14,7 +14,7 @@ tags_metadata = [
 ]
 
 description = """
-The Connect 4 API allows users to create, play, and manage multiple Connect 4 games programmatically. 
+The Connect 4 Game Hub API allows users to create, play, and manage multiple Connect 4 games programmatically. 
 It supports three game modes: two human players, one human versus a computer, and two computer players. 
 
 ### Class and Instance Representation
@@ -33,7 +33,7 @@ The `Game` class provides several key methods organized into logical groupings:
 
 ### Underlying Data Structures
 The API relies on the following basic data structures to support its functionality:
-- **Game Board Representation**: The board is structured as a grid, where each cell's state is tracked to determine the game's progress. The specific implementation details (like using integers or symbols) may vary, but the grid layout remains consistent across all game instances.
+- **Game Board Representation**: The board is structured as a grid, where each cell's state (None or occupied by 1 specific player) is tracked to determine the game's progress. The specific implementation details (like using integers or symbols) may vary, but the grid layout remains consistent across all game instances.
 - **Player Information**: Players are identified by unique identifiers, specifically `p1` for Player 1 and `p2` for Player 2. Each player’s identifier is associated with attributes such as their name and current score, allowing the API to manage interactions and enforce turn-taking effectively.
 - **Game State Management**: The API maintains a registry of active games, enabling efficient access and modification of ongoing game sessions.
 
@@ -51,7 +51,7 @@ The API follows a structured sequence of method calls to manage the game state e
 - **Quitting a Game**: Use the `quit_game` endpoint to remove a game from the active games list, effectively terminating the game session.
 
 ### Data Persistence
-The Connect 4 API stores game data in memory, meaning that games only persist for the duration of the current server session. 
+The Connect 4 Game Hub API stores game data in memory, meaning that games only persist for the duration of the current server session. 
 Once the server is restarted or crashes, all games and their states will be lost. 
 This approach is suitable for environments where games do not need to be persisted long-term. If persistence across sessions or server restarts is required, you may need to modify the implementation to store game data in a more durable storage solution, such as a database.
 
@@ -70,11 +70,13 @@ This API does not impose any thread-safety requirements. Implementations should 
     curl -X POST "http://127.0.0.1:8000/games/{game_id}/moves?player_id=p1&column=3"
     ```
     Player 1 drops a piece into column 3.
+
+For more details on available endpoints and their usage, refer to the API endpoint documentation as well as their sample response objects below.
 """
 
 # FastAPI application setup with metadata
 app = FastAPI(
-    title="Connect 4 API",
+    title="Connect 4 Game Hub API",
     description=description,
     version="1.0.0",
     openapi_tags=tags_metadata,
@@ -85,6 +87,6 @@ app = FastAPI(
 
 @app.get("/", response_model=dict, tags=["Root"])
 def read_root():
-    return {"message": "Welcome to the Connect 4 API! For more information, visit /docs."}
+    return {"message": "Welcome to the Connect 4 Game Hub API! For more information, visit /docs."}
 
 app.include_router(router)
