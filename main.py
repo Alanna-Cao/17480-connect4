@@ -14,7 +14,7 @@ tags_metadata = [
 ]
 
 description = """
-The Connect 4 API allows users to create, play, and manage Connect 4 games programmatically. 
+The Connect 4 API allows users to create, play, and manage multiple Connect 4 games programmatically. 
 It supports three game modes: two human players, one human versus a computer, and two computer players. 
 
 ### Class and Instance Representation
