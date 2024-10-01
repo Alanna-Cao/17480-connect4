@@ -366,4 +366,4 @@ def get_next_move(game_id: str) -> dict:
     if next_move is None:
         raise HTTPException(status_code=400, detail="No valid moves available")
     
-    return {"message": "Next move calculated.", "next_move": next_move}
+    return {"message": "Next move calculated.", "next_move": next_move["next_move"]}
